@@ -1,5 +1,4 @@
 
-import io
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
@@ -8,7 +7,7 @@ from routegen import build_route_for_place
 
 st.set_page_config(page_title="Trail-First Route Generator", page_icon="🥾")
 
-st.title("🥾 Trail‑First Walk/Hike Route Generator")
+st.title("🥾 Trail-First Walk/Hike Route Generator")
 st.write("Give me an **area** and a **target distance**, and I'll try to build a loop that uses existing trails and walking paths.")
 
 with st.form("params"):
@@ -24,15 +23,13 @@ if submitted:
 
         st.success(f"Built a loop in **{result['place']}** — estimated distance: **{result['distance_m']/1000:.2f} km**")
 
-        # map
         center = result["center"]
         m = folium.Map(location=center, zoom_start=14, tiles="OpenStreetMap")
         folium.PolyLine(result["latlon"], weight=5, opacity=0.9).add_to(m)
         folium.Marker(location=result["latlon"][0], tooltip="Start/Finish").add_to(m)
 
-        st_data = st_folium(m, width=800)
+        st_folium(m, width=800)
 
-        # GPX download
         gpx_bytes = result["gpx"].encode("utf-8")
         st.download_button("⬇️ Download GPX", data=gpx_bytes, file_name="route.gpx", mime="application/gpx+xml")
 
