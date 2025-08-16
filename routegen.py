@@ -1,10 +1,10 @@
 
 from __future__ import annotations
-import math
-import random
+import math, random
 from typing import List, Tuple, Optional, Dict, Any
-
 import networkx as nx
+import numpy as np
+from sklearn.neighbors import BallTree
 
 try:
     import osmnx as ox
@@ -252,3 +252,20 @@ def build_route_for_place(
         "latlon": latlon,
         "gpx": export_gpx(latlon, name=f"{display_name} loop ~{kilometers:.1f}km")
     }
+
+class LatLonIndex:
+    """Fast nearest-node lookup on unprojected (lat,lon) using haversine BallTree."""
+    def __init__(self, G):
+        # store nodes in a stable order
+        self.node_ids = np.array(list(G.nodes()))
+        lats = np.array([G.nodes[n]["y"] for n in self.node_ids])
+        lons = np.array([G.nodes[n]["x"] for n in self.node_ids])
+        # BallTree expects radians
+        self.X_rad = np.vstack([np.radians(lats), np.radians(lons)]).T
+        self.tree = BallTree(self.X_rad, metric="haversine")
+
+    def nearest_node(self, lat, lon):
+        q = np.array([[np.radians(lat), np.radians(lon)]])
+        dist, idx = self.tree.query(q, k=1)
+        # dist is in radians; multiply by Earth radius if you need meters
+        return int(self.node_ids[idx[0,0]])

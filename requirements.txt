@@ -8,3 +8,4 @@ folium>=0.14
 streamlit>=1.32
 streamlit-folium>=0.17
 gpxpy>=1.6
+scikit-learn>=1.3
